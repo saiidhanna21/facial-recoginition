@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Face detection on the browser using javascript !</title>
+  <script defer src="{{ url_for('static', filename='face-api.min.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div>
+    <div>
+      <h3 style="color:red;text-align:center">
+        Make Sure To Allow Integrated Web Cam
+      </h3>
+    </div>
+    <div>
+      <h1 style="text-align: center;">Facial Recognition</h1>
+    </div>
+    <div>
+      <video id="video" width="600" height="450" autoplay>
+    </div>
+  </div>
+  <div id="message" style="color: red;"></div>
+</body>
+</html>
