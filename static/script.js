@@ -2,7 +2,7 @@ const video = document.getElementById('video');
 var data;
 let attendanceUpdated = false;
 async function getData() {
-	const response = await fetch('http://localhost:5000/data');
+	const response = await fetch('https://facial-recognitions.onrender.com/data');
 	data = await response.json();
 }
 getData()

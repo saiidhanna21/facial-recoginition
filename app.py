@@ -11,6 +11,11 @@ from cryptography.fernet import Fernet
 import os
 import mysql.connector
 
+host = os.environ.get('DB_HOST')
+user = os.environ.get('DB_USER')
+password = os.environ.get('DB_PASSWORD')
+database = os.environ.get('DB_DATABASE')
+
 app = Flask(__name__)
 CORS(app) 
 app.secret_key = 'secret'
@@ -36,10 +41,10 @@ def index():
 def get_data():
     # Connect to MySQL
     conn = mysql.connector.connect(
-        host='srv1031.hstgr.io',
-        user='u779400461_admin',
-        password='8@IZ?5HmYHe',
-        database='u779400461_students'
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
 
     # Execute a query
@@ -70,7 +75,7 @@ def get_data():
     json_data = json.dumps(result)
 
     return json_data
-get_data()
+    
 @app.route('/api/save_image', methods=['POST'])
 def save_image():
     # Retrieve the base64 image data from the request payload
@@ -109,10 +114,10 @@ def get_student_id():
     person_name = request.json.get('personName')
     
     conn = mysql.connector.connect(
-        host='srv1031.hstgr.io',
-        user='u779400461_admin',
-        password='8@IZ?5HmYHe',
-        database='u779400461_students'
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
     
     cursor = conn.cursor()
@@ -136,10 +141,10 @@ def update_attendance():
     student_id = request.json.get('student_id')
     otp_input = request.json.get('otp_input')
     conn = mysql.connector.connect(
-        host='srv1031.hstgr.io',
-        user='u779400461_admin',
-        password='8@IZ?5HmYHe',
-        database='u779400461_students'
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
 
     cursor = conn.cursor()
