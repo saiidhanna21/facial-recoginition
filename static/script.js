@@ -111,7 +111,7 @@ video.addEventListener('play', async () => {
 				updateAttendance(personName);
 			}
 		});
-	}, 100);
+	}, 1000);
 });
 async function updateAttendance(personName) {
 	
