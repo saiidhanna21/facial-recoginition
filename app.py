@@ -31,7 +31,7 @@ def index():
             #Set the session variable with the provided session time
             session['session_time'] = session_time
         else:
-            raise ValueError("Unauthorized Access")
+            raise ValueError("Unauthorized Access"+os.environ.get('DB_HOST'))
     except:
         return jsonify({'message':'Unauthorized Access'})
     return render_template('index.html')
@@ -41,10 +41,10 @@ def index():
 def get_data():
     # Connect to MySQL
     conn = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host='srv1031.hstgr.io',
+        user='u779400461_admin',
+        password='8@IZ?5HmYHe',
+        database='u779400461_students'
     )
 
     # Execute a query
@@ -56,7 +56,7 @@ def get_data():
     cursor.close()
     conn.close()
     result = []
-
+    print(data)
     for item in data:
         # Convert bytes to base64 string
         blob_base64 = base64.b64encode(item[3]).decode('utf-8')
@@ -76,7 +76,7 @@ def get_data():
     json_data = json.dumps(result)
 
     return json_data
-    
+get_data()
 @app.route('/api/save_image', methods=['POST'])
 def save_image():
     # Retrieve the base64 image data from the request payload
@@ -171,5 +171,5 @@ def serve_static(filename):
 
 if __name__ == '__main__':
     CORS(app)
-    app.run(debug=True,host='0.0.0.0')
+    app.run(debug=True,host=os.environ.get('DB_HOST'))
 
