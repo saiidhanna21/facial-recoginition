@@ -109,9 +109,8 @@ video.addEventListener('play', async () => {
 				label: result,
 			});
 			drawBox.draw(canvas);
-			console.log(result.distance)
 			if (result.distance <= 0.4) {
-				result.label === 'unknown'
+				result.label = 'unknown'
 			}
 			if (result.label !== 'unknown'&& !attendanceUpdated) {
 				const personName = result.label;
