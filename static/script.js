@@ -6,7 +6,7 @@ async function getData() {
 	const response = await fetch('https://facial-recognitions.onrender.com/data');
 	data = await response.json();
 }
-getData();
+getData()
 Promise.all([
 	faceapi.nets.ssdMobilenetv1.loadFromUri('/static/models'),
 	faceapi.nets.faceRecognitionNet.loadFromUri('/static/models'),
@@ -30,7 +30,7 @@ function startWebcam() {
 async function getLabeledFaceDescriptions() {
 	try {
 		const data_values = await Promise.all(
-			data.map(async (item, index) => {
+			data.map(async (item,index) => {
 				const label = item.name;
 				var filePath;
 				const descriptions = [];
@@ -43,7 +43,7 @@ async function getLabeledFaceDescriptions() {
 						},
 						body: JSON.stringify({
 							base64_image: imageData,
-							index,
+							index
 						}),
 					})
 						.then((response) => response.json())
@@ -52,8 +52,8 @@ async function getLabeledFaceDescriptions() {
 							filePath = data.file_path;
 						})
 						.catch((error) => console.error(error));
-
-					filePath = `/${filePath}`;
+					
+					filePath = `/${filePath}`
 					const img = await faceapi.fetchImage(filePath);
 					const detections = await faceapi
 						.detectSingleFace(img)
@@ -75,77 +75,69 @@ async function getLabeledFaceDescriptions() {
 	}
 }
 
-video.addEventListener(
-	'play',
-	async () => {
-		const labeledFaceDescriptors = await getLabeledFaceDescriptions();
-		const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
 
-		const canvas = faceapi.createCanvasFromMedia(video);
-		document.body.append(canvas);
 
-		const displaySize = { width: video.width, height: video.height };
-		faceapi.matchDimensions(canvas, displaySize);
+video.addEventListener('play', async () => {
+	const labeledFaceDescriptors = await getLabeledFaceDescriptions();
+	const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
 
-		// Set willReadFrequently attribute to true for the canvas
-		canvas.getContext('2d').willReadFrequently = true;
+	const canvas = faceapi.createCanvasFromMedia(video);
+	document.body.append(canvas);
 
-		setInterval(async () => {
-			 const detectionWithLandmarks = await faceapi
-					.detectSingleFace(video)
-					.withFaceLandmarks();
+	const displaySize = { width: video.width, height: video.height };
+	faceapi.matchDimensions(canvas, displaySize);
 
-				if (detectionWithLandmarks) {
-					const faceDescriptor = await faceapi.computeFaceDescriptor(
-						detectionWithLandmarks.landmarks
-					);
-					const detection = {
-						...detectionWithLandmarks,
-						descriptor: faceDescriptor,
-					};
+	// Set willReadFrequently attribute to true for the canvas
+	canvas.getContext('2d').willReadFrequently = true;
 
-					const resizedDetection = faceapi.resizeResults(
-						detection,
-						displaySize
-					);
+	setInterval(async () => {
+		const detections = await faceapi
+			.detectAllFaces(video)
+			.withFaceLandmarks()
+			.withFaceDescriptors();
 
-					canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+		const resizedDetections = faceapi.resizeResults(detections, displaySize);
 
-					const result = faceMatcher.findBestMatch(detection.descriptor);
+		canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
-					const box = resizedDetection.detection.box;
-					const drawBox = new faceapi.draw.DrawBox(box, {
-						label: result.toString(),
-					});
-					drawBox.draw(canvas);
-					if (result.label !== 'unknown' && !attendanceUpdated) {
-						const personName = result.label;
-						labelCounter[personName] = (labelCounter[personName] || 0) + 1;
-
-						if (labelCounter[personName] >= 10) {
-							console.log(
-								`Detected ${personName} more than 10 times. Stopping detection.`
-							);
-							if (!attendanceUpdated) {
-								updateAttendance(personName);
-							}
-							return;
-						}
-					} else if (result.label === 'unknown') {
-						const unknownCounter = (labelCounter['unknown'] || 0) + 1;
-
-						if (unknownCounter >= 10) {
-							console.log('Cannot detect face. Please try again.');
-							return;
-						}
-						labelCounter['unknown'] = unknownCounter;
-					}
-				}
+		const results = resizedDetections.map((d) => {
+			return faceMatcher.findBestMatch(d.descriptor);
 		});
-	},
-	1000
-);
+		results.forEach((result, i) => {
+			const box = resizedDetections[i].detection.box;
+			const drawBox = new faceapi.draw.DrawBox(box, {
+				label: result,
+			});
+			drawBox.draw(canvas);
+			if (result.label !== 'unknown' && !attendanceUpdated) {
+				const personName = result.label;
+				labelCounter[personName] = (labelCounter[personName] || 0) + 1;
+
+				if (labelCounter[personName] >= 10) {
+					console.log(
+						`Detected ${personName} more than 10 times. Stopping detection.`
+					);
+					if (!attendanceUpdated) {
+						updateAttendance(personName);
+					}
+					return;
+				}
+
+			} else if (result.label === 'unknown') {
+				const unknownCounter = (labelCounter['unknown'] || 0) + 1;
+
+				if (unknownCounter >= 10) {
+					console.log('Cannot detect face. Please try again.');
+					return;
+				}
+
+				labelCounter['unknown'] = unknownCounter;
+			}
+		});
+	}, 1000);
+});
 async function updateAttendance(personName) {
+	
 	if (!attendanceUpdated) {
 		attendanceUpdated = true;
 		await fetch('/api/get_student_id', {
@@ -161,8 +153,8 @@ async function updateAttendance(personName) {
 			.then((data) => {
 				const student_id = data.student_id;
 
-				const otpHeader = document.createElement('h3');
-				otpHeader.innerText = 'Enter Otp: ';
+				const otpHeader = document.createElement('h3')
+				otpHeader.innerText = "Enter Otp: "
 				// Display the OTP input field and submit button
 				const otpInput = document.createElement('input');
 				otpInput.setAttribute('type', 'text');
@@ -188,26 +180,23 @@ async function updateAttendance(personName) {
 					otpInput.nextSibling
 				);
 
+
 				// Add an event listener to the submit button
 				submitButton.addEventListener('click', async () => {
 					const otp_input = otpInput.value;
-
+					
 					await fetch('/api/update_attendance', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
 						},
-						body: JSON.stringify({
-							student_id: student_id,
-							otp_input: otp_input,
-						}),
+						body: JSON.stringify({ student_id: student_id, otp_input: otp_input }),
 					})
 						.then((response) => response.json())
 						.then((data) => {
 							if (data.message === 'Attendance updated successfully') {
 								// Handle successful attendance update
-								document.getElementById('message').innerText =
-									'Attendance Updated';
+								document.getElementById('message').innerText = "Attendance Updated"
 							} else {
 								// Handle OTP verification failure
 								document.getElementById('message').innerText =
@@ -215,6 +204,6 @@ async function updateAttendance(personName) {
 							}
 						});
 				});
-			});
+			})
 	}
 }
