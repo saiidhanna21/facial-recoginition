@@ -30,40 +30,19 @@ function startWebcam() {
 async function getLabeledFaceDescriptions() {
 	try {
 		const data_values = await Promise.all(
-			data.map(async (item,index) => {
+			data.map(async (item, index) => {
 				const label = item.name;
-				var filePath;
 				const descriptions = [];
-				for (let i = 1; i <= 1; i++) {
-					const imageData = item.image;
-					await fetch('/api/save_image', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							base64_image: imageData,
-							index
-						}),
-					})
-						.then((response) => response.json())
-						.then((data) => {
-							// Retrieve the file path from the API response
-							filePath = data.file_path;
-						})
-						.catch((error) => console.error(error));
-					
-					filePath = `/${filePath}`
-					const img = await faceapi.fetchImage(filePath);
-					const detections = await faceapi
-						.detectSingleFace(img)
-						.withFaceLandmarks()
-						.withFaceDescriptor();
-					if (detections) {
-						descriptions.push(detections.descriptor);
-					} else {
-						console.log('No face detected in the image:', filePath);
-					}
+				const imageData = item.image;
+				const img = await faceapi.fetchImage(imageData);
+				const detections = await faceapi
+					.detectSingleFace(img)
+					.withFaceLandmarks()
+					.withFaceDescriptor();
+				if (detections) {
+					descriptions.push(detections.descriptor);
+				} else {
+					console.log('No face detected for:', label);
 				}
 				return new faceapi.LabeledFaceDescriptors(label, descriptions);
 			})
@@ -100,13 +79,18 @@ video.addEventListener('play', async () => {
 
 		canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
+		if (resizedDetections.length === 0) {
+			console.log('No face detected');
+			return;
+		}
+
 		const results = resizedDetections.map((d) => {
 			return faceMatcher.findBestMatch(d.descriptor);
 		});
 		results.forEach((result, i) => {
 			const box = resizedDetections[i].detection.box;
 			const drawBox = new faceapi.draw.DrawBox(box, {
-				label: result,
+				label: result.label,
 			});
 			drawBox.draw(canvas);
 			if (result.label !== 'unknown' && !attendanceUpdated) {
@@ -119,12 +103,12 @@ video.addEventListener('play', async () => {
 					}
 					return;
 				}
-
 			} else if (result.label === 'unknown') {
 				const unknownCounter = (labelCounter['unknown'] || 0) + 1;
 
 				if (unknownCounter >= 10) {
-					document.getElementById('title').innerText = "Unknown Detection. Try Again Later";
+					document.getElementById('title').innerText =
+						'Unknown Detection. Try Again Later';
 					clearInterval(intervalId);
 					return;
 				}
