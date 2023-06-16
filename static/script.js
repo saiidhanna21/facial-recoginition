@@ -90,7 +90,7 @@ video.addEventListener('play', async () => {
 	// Set willReadFrequently attribute to true for the canvas
 	canvas.getContext('2d').willReadFrequently = true;
 
-	setInterval(async () => {
+	let intervalId = setInterval(async () => {
 		const detections = await faceapi
 			.detectAllFaces(video)
 			.withFaceLandmarks()
@@ -114,9 +114,6 @@ video.addEventListener('play', async () => {
 				labelCounter[personName] = (labelCounter[personName] || 0) + 1;
 
 				if (labelCounter[personName] >= 10) {
-					console.log(
-						`Detected ${personName} more than 10 times. Stopping detection.`
-					);
 					if (!attendanceUpdated) {
 						updateAttendance(personName);
 					}
@@ -127,7 +124,8 @@ video.addEventListener('play', async () => {
 				const unknownCounter = (labelCounter['unknown'] || 0) + 1;
 
 				if (unknownCounter >= 10) {
-					console.log('Cannot detect face. Please try again.');
+					document.getElementById('title').innerText = "Unknown Detection. Try Again Later";
+					clearInterval(intervalId);
 					return;
 				}
 
