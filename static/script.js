@@ -91,43 +91,44 @@ video.addEventListener(
 		canvas.getContext('2d').willReadFrequently = true;
 
 		setInterval(async () => {
-			const detection = await faceapi
+			const detectionWithLandmarks = await faceapi
 				.detectSingleFace(video)
-				.withFaceLandmarks()
-				.withFaceDescriptors();
+				.withFaceLandmarks();
 
-			const resizedDetection = faceapi.resizeResults(detection, displaySize);
+			if (detectionWithLandmarks) {
+				const resizedDetection = faceapi.resizeResults(detectionWithLandmarks, displaySize);
 
-			canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
-			const result = faceMatcher.findBestMatch(resizedDetection.descriptor);
+				const result = faceMatcher.findBestMatch(resizedDetection.descriptor);
 
-			const box = resizedDetection.detection.box;
-			const drawBox = new faceapi.draw.DrawBox(box, {
-				label: result.toString(),
-			});
-			drawBox.draw(canvas);
-			if (result.label !== 'unknown' && !attendanceUpdated) {
-				const personName = result.label;
-				labelCounter[personName] = (labelCounter[personName] || 0) + 1;
+				const box = resizedDetection.detection.box;
+				const drawBox = new faceapi.draw.DrawBox(box, {
+					label: result.toString(),
+				});
+				drawBox.draw(canvas);
+				if (result.label !== 'unknown' && !attendanceUpdated) {
+					const personName = result.label;
+					labelCounter[personName] = (labelCounter[personName] || 0) + 1;
 
-				if (labelCounter[personName] >= 10) {
-					console.log(
-						`Detected ${personName} more than 10 times. Stopping detection.`
-					);
-					if (!attendanceUpdated) {
-						updateAttendance(personName);
+					if (labelCounter[personName] >= 10) {
+						console.log(
+							`Detected ${personName} more than 10 times. Stopping detection.`
+						);
+						if (!attendanceUpdated) {
+							updateAttendance(personName);
+						}
+						return;
 					}
-					return;
-				}
-			} else if (result.label === 'unknown') {
-				const unknownCounter = (labelCounter['unknown'] || 0) + 1;
+				} else if (result.label === 'unknown') {
+					const unknownCounter = (labelCounter['unknown'] || 0) + 1;
 
-				if (unknownCounter >= 10) {
-					console.log('Cannot detect face. Please try again.');
-					return;
+					if (unknownCounter >= 10) {
+						console.log('Cannot detect face. Please try again.');
+						return;
+					}
+					labelCounter['unknown'] = unknownCounter;
 				}
-				labelCounter['unknown'] = unknownCounter;
 			}
 		});
 	},
