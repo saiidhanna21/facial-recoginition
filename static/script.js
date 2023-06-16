@@ -1,6 +1,7 @@
 const video = document.getElementById('video');
 var data;
 let attendanceUpdated = false;
+let labelCounter = {};
 async function getData() {
 	const response = await fetch('https://facial-recognitions.onrender.com/data');
 	data = await response.json();
@@ -108,11 +109,29 @@ video.addEventListener('play', async () => {
 				label: result,
 			});
 			drawBox.draw(canvas);
-			console.log(result.label);
-			console.log(result.distance);
 			if (result.label !== 'unknown' && !attendanceUpdated) {
 				const personName = result.label;
-				updateAttendance(personName);
+				labelCounter[personName] = (labelCounter[personName] || 0) + 1;
+
+				if (labelCounter[personName] >= 10) {
+					console.log(
+						`Detected ${personName} more than 10 times. Stopping detection.`
+					);
+					return;
+				}
+
+				if (!attendanceUpdated) {
+					updateAttendance(personName);
+				}
+			} else if (result.label === 'unknown') {
+				const unknownCounter = (labelCounter['unknown'] || 0) + 1;
+
+				if (unknownCounter >= 10) {
+					console.log('Cannot detect face. Please try again.');
+					return;
+				}
+
+				labelCounter['unknown'] = unknownCounter;
 			}
 		});
 	}, 1000);
