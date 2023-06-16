@@ -165,5 +165,5 @@ def serve_static(filename):
 
 if __name__ == '__main__':
     CORS(app)
-    app.run(debug=True,host=os.environ.get('DB_HOST'))
+    app.run(debug=True,host='0.0.0.0')
 
