@@ -86,6 +86,9 @@ video.addEventListener('play', async () => {
 	const displaySize = { width: video.width, height: video.height };
 	faceapi.matchDimensions(canvas, displaySize);
 
+	// Set willReadFrequently attribute to true for the canvas
+	canvas.getContext('2d').willReadFrequently = true;
+
 	setInterval(async () => {
 		const detections = await faceapi
 			.detectAllFaces(video)
@@ -105,7 +108,8 @@ video.addEventListener('play', async () => {
 				label: result,
 			});
 			drawBox.draw(canvas);
-			console.log(result.label)
+			console.log(result.label);
+			console.log(result.distance);
 			if (result.label !== 'unknown' && !attendanceUpdated) {
 				const personName = result.label;
 				updateAttendance(personName);
