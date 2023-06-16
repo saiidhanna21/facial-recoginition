@@ -11,11 +11,6 @@ from cryptography.fernet import Fernet
 import os
 import mysql.connector
 
-host = os.environ.get('DB_HOST')
-user = os.environ.get('DB_USER')
-password = os.environ.get('DB_PASSWORD')
-database = os.environ.get('DB_DATABASE')
-
 app = Flask(__name__)
 CORS(app) 
 app.secret_key = 'secret'
@@ -33,7 +28,7 @@ def index():
         else:
             raise ValueError("Unauthorized Access")
     except:
-        return jsonify({'message':'Unauthorized Access'+os.environ.get('DB_HOST')})
+        return jsonify({'message':'Unauthorized Access'})
     return render_template('index.html')
 
 
@@ -41,10 +36,10 @@ def index():
 def get_data():
     # Connect to MySQL
     conn = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host='srv1031.hstgr.io',
+        user='u779400461_admin',
+        password='8@IZ?5HmYHe',
+        database='u779400461_students'
     )
 
     # Execute a query
@@ -114,10 +109,10 @@ def get_student_id():
     person_name = request.json.get('personName')
     
     conn = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host='srv1031.hstgr.io',
+        user='u779400461_admin',
+        password='8@IZ?5HmYHe',
+        database='u779400461_students'
     )
     
     cursor = conn.cursor()
@@ -141,10 +136,10 @@ def update_attendance():
     student_id = request.json.get('student_id')
     otp_input = request.json.get('otp_input')
     conn = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host='srv1031.hstgr.io',
+        user='u779400461_admin',
+        password='8@IZ?5HmYHe',
+        database='u779400461_students'
     )
 
     cursor = conn.cursor()
