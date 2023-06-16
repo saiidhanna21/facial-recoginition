@@ -105,7 +105,7 @@ video.addEventListener('play', async () => {
 				label: result,
 			});
 			drawBox.draw(canvas);
-
+			console.log(result.label)
 			if (result.label !== 'unknown' && !attendanceUpdated) {
 				const personName = result.label;
 				updateAttendance(personName);
