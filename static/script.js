@@ -65,11 +65,15 @@ async function getLabeledFaceDescriptions() {
 						console.log('No face detected in the image:', filePath);
 					}
 				}
-				return new faceapi.LabeledFaceDescriptors(label, descriptions);
+				if (descriptions.length > 0) {
+					return new faceapi.LabeledFaceDescriptors(label, descriptions);
+				} else {
+					console.log('No face detected for label:', label);
+					return null;
+				}
 			})
 		);
-
-		return data_values;
+    	return data_values.filter((value) => value !== null);
 	} catch (error) {
 		console.error('Error:', error);
 	}
@@ -79,7 +83,10 @@ async function getLabeledFaceDescriptions() {
 
 video.addEventListener('play', async () => {
 	const labeledFaceDescriptors = await getLabeledFaceDescriptions();
-	const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
+	  const filteredLabeledFaceDescriptors = labeledFaceDescriptors.filter(
+			(value) => value !== null
+		);
+	const faceMatcher = new faceapi.FaceMatcher(filteredLabeledFaceDescriptors);
 
 	const canvas = faceapi.createCanvasFromMedia(video);
 	document.body.append(canvas);
